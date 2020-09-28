@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { withRouter } from "react-router-dom";
 import { getLocalStoreag } from "../../constant/sessions";
 import makeToast from "../../Toaster";
@@ -16,6 +16,11 @@ const ChatroomPage = (props) => {
   const [userId, setUserId] = React.useState("");
   const [userTyping, setuserTyping] = React.useState(null);
   var timeout;
+  const el = useRef(null);
+
+  useEffect(() => {
+    if (el && el.current) el.current.scrollIntoView({ block: "end" });
+  });
 
   const [socket] = useSocket(apiUrl, {
     query: {
@@ -47,26 +52,27 @@ const ChatroomPage = (props) => {
   //   }
   // };
 
-  React.useEffect(async () => {
-    try {
-      const url = apiUrl + `/chatroom/messages/${props.match.params.id}`;
-      const responce = await axios.post(url, {
-        headers: {
-          Authorization: "Bearer " + getLocalStoreag(),
-        },
-      });
-      if (responce) {
-        console.log("i am the response", responce);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  });
+  React.useEffect(() => {
+    (async function () {
+      try {
+        const url = apiUrl + `/chatroom/messages/${props.match.params.id}`;
+        const responce = await axios.get(url, {
+          headers: {
+            Authorization: "Bearer " + getLocalStoreag(),
+          },
+        });
+        if (responce) {
+          const newMessages = [...messages, ...responce.data];
+          setMessages(newMessages);
+        }
+      } catch (error) {}
+    })();
+    return () => {};
+  }, []);
 
   React.useEffect(() => {
     if (socket) {
       socket.on("newMessage", (message) => {
-        console.log(message);
         const newMessages = [...messages, ...message];
         setMessages(newMessages);
       });
@@ -85,7 +91,6 @@ const ChatroomPage = (props) => {
   };
 
   React.useEffect(() => {
-    console.log(socket);
     const token = getLocalStoreag();
     if (token) {
       const payload = JSON.parse(atob(token.split(".")[1]));
@@ -151,10 +156,13 @@ const ChatroomPage = (props) => {
     <div className="chatroomPage">
       <div className="chatroomSection">
         <div className="cardHeader">Chatroom Name</div>
+
         <div className="chatroomContent">
           {messages.map((message, i) => (
             <div
               key={i}
+              id={"el"}
+              ref={el}
               className={userId === message.userId ? "message" : "otherMessage"}
               style={{
                 fontFamily: "monospace",
@@ -177,6 +185,7 @@ const ChatroomPage = (props) => {
             </div>
           ))}
         </div>
+
         <div className="chatroomActions">
           {userTyping && userTyping.typing && userTyping.user != userId ? (
             <div>
