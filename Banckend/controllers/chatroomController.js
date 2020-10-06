@@ -31,6 +31,10 @@ exports.getAllChatrooms = async (req, res) => {
 };
 
 exports.getAllChatroomMessages = async (req, res) => {
+  const page = req.query.page;
+  const limit = req.query.limit;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
   try {
     const message = await Message.find({ chatroomId: req.params.id }).populate({
       path: "chatroomId",

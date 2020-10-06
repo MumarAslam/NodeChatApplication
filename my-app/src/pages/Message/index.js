@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 import { getLocalStoreag } from "../../constant/sessions";
 import makeToast from "../../Toaster";
@@ -8,6 +8,8 @@ import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 import { useImmer } from "use-immer";
 import axios from "axios";
+import "react-perfect-scrollbar/dist/css/styles.css";
+import PerfectScrollbar from "react-perfect-scrollbar";
 
 const ChatroomPage = (props) => {
   const chatroomId = props.match.params.id;
@@ -17,10 +19,11 @@ const ChatroomPage = (props) => {
   const [userTyping, setuserTyping] = React.useState(null);
   var timeout;
   const el = useRef(null);
+  const myRef = useRef(null);
 
   useEffect(() => {
-    if (el && el.current) el.current.scrollIntoView({ block: "end" });
-  });
+    console.log("i am ref", myRef);
+  }, [myRef.onscroll]);
 
   const [socket] = useSocket(apiUrl, {
     query: {
@@ -55,7 +58,9 @@ const ChatroomPage = (props) => {
   React.useEffect(() => {
     (async function () {
       try {
-        const url = apiUrl + `/chatroom/messages/${props.match.params.id}`;
+        const url =
+          apiUrl +
+          `/chatroom/messages/${props.match.params.id}?page=1&limit=10`;
         const responce = await axios.get(url, {
           headers: {
             Authorization: "Bearer " + getLocalStoreag(),
@@ -89,6 +94,11 @@ const ChatroomPage = (props) => {
       messageRef.current.value = "";
     }
   };
+
+  useEffect(() => {
+    if (el && el.current) el.current.scrollIntoView({ block: "end" });
+    console.log(el);
+  });
 
   React.useEffect(() => {
     const token = getLocalStoreag();
@@ -152,38 +162,49 @@ const ChatroomPage = (props) => {
     });
   };
 
+  const papulate = (container) => {
+    if (container === 0) {
+      console.log("i am in");
+    }
+  };
+
   return (
     <div className="chatroomPage">
       <div className="chatroomSection">
         <div className="cardHeader">Chatroom Name</div>
-
-        <div className="chatroomContent">
-          {messages.map((message, i) => (
-            <div
-              key={i}
-              id={"el"}
-              ref={el}
-              className={userId === message.userId ? "message" : "otherMessage"}
-              style={{
-                fontFamily: "monospace",
-                fontSize: "10px",
-                lineBreak: "anywhere",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <span
+        <div ref={myRef} className="chatroomContent">
+          <PerfectScrollbar
+            onScrollY={(container) => papulate(container.scrollTop)}
+          >
+            {messages.map((message, i) => (
+              <div
+                key={i}
+                id={"el"}
+                ref={el}
+                className={
+                  userId === message.userId ? "message" : "otherMessage"
+                }
                 style={{
                   fontFamily: "monospace",
                   fontSize: "10px",
                   lineBreak: "anywhere",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
-                {message.message}
-              </span>
-              <span>{message.name}</span>
-            </div>
-          ))}
+                <span
+                  style={{
+                    fontFamily: "monospace",
+                    fontSize: "10px",
+                    lineBreak: "anywhere",
+                  }}
+                >
+                  {message.message}
+                </span>
+                <span>{message.name}</span>
+              </div>
+            ))}
+          </PerfectScrollbar>
         </div>
 
         <div className="chatroomActions">

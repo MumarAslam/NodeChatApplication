@@ -14,10 +14,7 @@
   border: 1px solid #eee;
   position: relative;
 }
-scroll {
-  height:400px;
-  overflow:scroll;
-}
+
 .chatroomContent {
   position: absolute;
   top: 2.5rem;

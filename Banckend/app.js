@@ -93,10 +93,10 @@ io.on("connection", (socket) => {
 
   socket.on("joinRoom", async ({ chatroomId }) => {
     socket.join(chatroomId);
-    const message = await Message.find({ chatroomId: chatroomId }).populate({
-      path: "chatroomId",
-    });
-    io.to(chatroomId).emit("newMessage", message);
+    // const message = await Message.find({ chatroomId: chatroomId }).populate({
+    //   path: "chatroomId",
+    // });
+    // io.to(chatroomId).emit("newMessage", message);
     console.log("A user joined chatroom: " + chatroomId);
   });
 
