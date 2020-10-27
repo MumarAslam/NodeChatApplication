@@ -14,13 +14,15 @@ const LoginPage = (props) => {
     const password = passwordRef.current.value;
 
     try {
-      const url = apiUrl + "/user/login";
+      const url = apiUrl + "/user-signin";
       const responce = await axios.post(url, {
         email: email,
         password: password,
+        type: "EMAIL",
+        role: "USER",
       });
-      if (responce && responce.data.token) {
-        setLocalStoreage(responce.data.token);
+      if (responce) {
+        setLocalStoreage(responce.data.data.accessToken);
         props.history.push("/room");
       }
     } catch (e) {
@@ -53,7 +55,12 @@ const LoginPage = (props) => {
           />
         </div>
         <button onClick={loginUser}>Login</button>
-        <button style={{marginTop:'5px'}} onClick={() => props.history.push("/signup")}>Signup</button>
+        <button
+          style={{ marginTop: "5px" }}
+          onClick={() => props.history.push("/signup")}
+        >
+          Signup
+        </button>
       </div>
     </div>
   );

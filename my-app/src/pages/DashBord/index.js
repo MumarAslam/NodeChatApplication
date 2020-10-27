@@ -8,18 +8,18 @@ const DashboardPage = (props) => {
   const nameRef = React.createRef();
 
   const getChatrooms = () => {
-    const url = apiUrl + "/chatroom";
+    const url = apiUrl + "/chatrooms";
     axios
       .get(url, {
         headers: {
-          Authorization: "Bearer " + getLocalStoreag(),
+          Authorization: getLocalStoreag(),
         },
       })
       .then((response) => {
-        setChatrooms(response.data);
+        setChatrooms(response.data.data);
       })
       .catch((err) => {
-        setTimeout(getChatrooms, 3000);
+        // setTimeout(getChatrooms, 3000);
       });
 
     //   try {
@@ -46,9 +46,20 @@ const DashboardPage = (props) => {
   const createChatRoom = async () => {
     const name = nameRef.current.value;
     try {
-      const url = apiUrl + "/chatroom";
+      const url = apiUrl + "/create-chatroom";
       const headers = { authorization: `Bearer ${getLocalStoreag()}` };
-      const responce = await axios.post(url, { name }, { headers });
+      const responce = await axios.post(
+        url,
+        {
+          chatroomName: name,
+          icon: "name",
+          participantIds: [
+            "5f8ede8cee2c670c26b987c1",
+            "5f8fef25fefc451a822fe5b8",
+          ],
+        },
+        { headers }
+      );
       if (responce) {
         getChatrooms();
       }
@@ -79,7 +90,7 @@ const DashboardPage = (props) => {
               <div className="join">Join</div>
             </Link>
           </div>
-        ))}
+        ))}chatroom
       </div>
     </div>
   );

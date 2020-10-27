@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import { getLocalStoreag } from "../../constant/sessions";
 import makeToast from "../../Toaster";
 import useSocket from "use-socket.io-client";
-import { apiUrl } from "../../constant/urls";
+import { apiUrl,chatUrl } from "../../constant/urls";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 import { useImmer } from "use-immer";
@@ -25,7 +25,7 @@ const ChatroomPage = (props) => {
     console.log("i am ref", myRef);
   }, [myRef.onscroll]);
 
-  const [socket] = useSocket(apiUrl, {
+  const [socket] = useSocket(chatUrl, {
     query: {
       token: getLocalStoreag(),
     },
@@ -55,25 +55,25 @@ const ChatroomPage = (props) => {
   //   }
   // };
 
-  React.useEffect(() => {
-    (async function () {
-      try {
-        const url =
-          apiUrl +
-          `/chatroom/messages/${props.match.params.id}?page=1&limit=10`;
-        const responce = await axios.get(url, {
-          headers: {
-            Authorization: "Bearer " + getLocalStoreag(),
-          },
-        });
-        if (responce) {
-          const newMessages = [...messages, ...responce.data];
-          setMessages(newMessages);
-        }
-      } catch (error) {}
-    })();
-    return () => {};
-  }, []);
+  // React.useEffect(() => {
+  //   (async function () {
+  //     try {
+  //       const url =
+  //         apiUrl +
+  //         `/chatroom/messages/${props.match.params.id}?page=1&limit=10`;
+  //       const responce = await axios.get(url, {
+  //         headers: {
+  //           Authorization:  getLocalStoreag(),
+  //         },
+  //       });
+  //       if (responce) {
+  //         const newMessages = [...messages, ...responce.data];
+  //         setMessages(newMessages);
+  //       }
+  //     } catch (error) {}
+  //   })();
+  //   return () => {};
+  // }, []);
 
   React.useEffect(() => {
     if (socket) {
@@ -104,7 +104,7 @@ const ChatroomPage = (props) => {
     const token = getLocalStoreag();
     if (token) {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      setUserId(payload.user._id);
+      setUserId(payload.id);
     }
     /////////////////////////////////////////////
 
@@ -127,10 +127,11 @@ const ChatroomPage = (props) => {
     socket.emit("joinRoom", {
       chatroomId,
     });
+    console.log(chatroomId)
     ////////////////////////////////////////////
 
     socket.on("isTyping", (info) => {
-      console.log(info);
+      console.log(info,'i am typing');
       setuserTyping(info);
     });
 
